@@ -27,8 +27,10 @@ public extension Templates {
         public var showDivider = true /// Show divider between menu items.
         public var shadow = Shadow.system
         public var backgroundColor = Color.clear /// A color that is overlaid over the entire screen, just underneath the menu.
-        public var scaleRange = CGFloat(40) ... CGFloat(90) /// For rubber banding - the range at which rubber banding should be applied.
-        public var minimumScale = CGFloat(0.7) /// For rubber banding - the scale the the popover should shrink to when rubber banding.
+        public var scaleRange = CGFloat(40) ...
+            CGFloat(90) /// For rubber banding - the range at which rubber banding should be applied.
+        public var minimumScale =
+            CGFloat(0.7) /// For rubber banding - the scale the the popover should shrink to when rubber banding.
 
         /// Create the default attributes for the popover menu.
         public init(
@@ -214,7 +216,10 @@ public extension Templates {
                     .popover(
                         present: $model.present,
                         attributes: {
-                            $0.position = .absolute(originAnchor: configuration.originAnchor, popoverAnchor: configuration.popoverAnchor)
+                            $0.position = .absolute(
+                                originAnchor: configuration.originAnchor,
+                                popoverAnchor: configuration.popoverAnchor
+                            )
                             $0.rubberBandingMode = .none
                             $0.dismissal.excludedFrames = {
                                 [
@@ -277,11 +282,9 @@ public extension Templates {
                             /// Inject index and model.
                             .environment(\.index, index)
                             .environmentObject(model)
-
                             /// Work with frames.
                             .frame(maxWidth: .infinity)
                             .contentShape(Rectangle())
-
                             /// Use `sizeReader` to prevent interfering with the scale effect.
                             .sizeReader { size in
                                 if let firstIndex = model.sizes.firstIndex(where: { $0.index == index }) {
@@ -299,10 +302,17 @@ public extension Templates {
                         }
                     }
                 }
-                .frame(width: configuration.width)
-                .fixedSize() /// Hug the width of the inner content.
-                .modifier(ClippedBackgroundModifier(context: context, configuration: configuration, expanded: expanded)) /// Clip the content if desired.
-                .scaleEffect(expanded ? 1 : 0.2, anchor: configuration.scaleAnchor?.unitPoint ?? model.getScaleAnchor(from: context))
+                .frame(maxWidth: context.windowBounds.width - context.attributes.screenEdgePadding.horizontal)
+                .fixedSize(horizontal: true, vertical: false) /// Hug the width of the inner content.
+                .modifier(ClippedBackgroundModifier(
+                    context: context,
+                    configuration: configuration,
+                    expanded: expanded
+                )) /// Clip the content if desired.
+                .scaleEffect(
+                    expanded ? 1 : 0.2,
+                    anchor: configuration.scaleAnchor?.unitPoint ?? model.getScaleAnchor(from: context)
+                )
                 .scaleEffect(model.scale, anchor: configuration.scaleAnchor?.unitPoint ?? model.getScaleAnchor(from: context))
                 .simultaneousGesture(
                     DragGesture(minimumDistance: 0, coordinateSpace: .global)
@@ -313,7 +323,8 @@ public extension Templates {
                             withAnimation {
                                 if let distance = model.getDistanceFromMenu(from: value.location) {
                                     if configuration.scaleRange.contains(distance) {
-                                        let percentage = (distance - configuration.scaleRange.lowerBound) / (configuration.scaleRange.upperBound - configuration.scaleRange.lowerBound)
+                                        let percentage = (distance - configuration.scaleRange.lowerBound) /
+                                            (configuration.scaleRange.upperBound - configuration.scaleRange.lowerBound)
                                         let scale = 1 - (1 - configuration.minimumScale) * percentage
                                         model.scale = scale
                                     } else if distance < configuration.scaleRange.lowerBound {
@@ -381,8 +392,7 @@ public extension Templates {
                 .onAppear {
                     if
                         let index = index,
-                        !model.itemIndices.contains(index)
-                    {
+                        !model.itemIndices.contains(index) {
                         /// Append this button's index to the model's item indices.
                         model.itemIndices.append(index)
                     }
